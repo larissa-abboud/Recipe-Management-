@@ -27,7 +27,9 @@ This is a Streamlit app to manage your recipes with features like adding, editin
 1. Install dependencies:
 
    ```bash
-   pip install -r requirements.txt
+   pip install streamlit 
+   pip install streamlit openai
+   
 
 
 2. Set your OpenAI API key Using environment variables
@@ -44,4 +46,13 @@ This is a Streamlit app to manage your recipes with features like adding, editin
 
 
    ```bash
-streamlit run app.py
+   streamlit run app.py
+
+## or  
+
+python -m streamlit run recipe_managment.py
+
+
+## 
+- run python -m streamlit run recipe_managment.py for application without ai 
+- run python -m streamlit run recipe_managment.py for application with ai but it need an api key .
