@@ -37,7 +37,7 @@ This is a Streamlit app to manage your recipes with features like adding, editin
    ```bash
    export OPENAI_API_KEY="your_openai_api_key_here"
 
-3. Set your OpenAI API key Using Streamlit Secrets
+3.  Or Set your OpenAI API key Using Streamlit Secrets
 
    ```bash
    OPENAI_API_KEY="your_openai_api_key_here"
