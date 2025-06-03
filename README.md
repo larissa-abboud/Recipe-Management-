@@ -43,16 +43,8 @@ This is a Streamlit app to manage your recipes with features like adding, editin
    OPENAI_API_KEY="your_openai_api_key_here"
 
 ## Usage
-
+- run python -m streamlit run recipe_managment.py for application without ai 
+- run python -m streamlit run recipe_managment.py for application with ai but it need an api key .
 
    ```bash
    streamlit run app.py
----
-## or  
-
-python -m streamlit run recipe_managment.py
-
-
-## 
-- run python -m streamlit run recipe_managment.py for application without ai 
-- run python -m streamlit run recipe_managment.py for application with ai but it need an api key .
