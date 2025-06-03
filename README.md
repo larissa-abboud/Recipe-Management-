@@ -44,7 +44,7 @@ This is a Streamlit app to manage your recipes with features like adding, editin
 
 ## Usage
 - run python -m streamlit run recipe_managment.py for application without ai 
-- run python -m streamlit run recipe_managment.py for application with ai but it need an api key .
+- run python -m streamlit run recipe_managment_ai.py for application with ai but it need an api key .
 
    ```bash
-   streamlit run app.py
+   streamlit run recipe_managment.py
