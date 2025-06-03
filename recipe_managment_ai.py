@@ -1,49 +1,67 @@
 import streamlit as st
-import pandas as pd
 import uuid
-import random
+import openai
 
+# Set your OpenAI API key here or better use Streamlit secrets
+#openai.api_key = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else "YOUR_API_KEY_HERE"
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 # Initialize session state
 if "recipes" not in st.session_state:
     st.session_state.recipes = []
 if "instruction_steps" not in st.session_state:
     st.session_state.instruction_steps = [""]
 
-# Mock AI recipe generator function
-def ai_generate_recipe(name):
-    # Simple mock data for demo purposes
-    cuisines = ["Indian", "Italian", "Mexican", "Chinese", "Other"]
-    tags = ["Vegetarian", "Non-Vegetarian", "Vegan", "Other"]
-    statuses = ["To Try", "Favorite", "Made Before"]
-    
-    ingredients = [
-        "1 cup of ingredient A",
-        "2 tablespoons of ingredient B",
-        "3 slices of ingredient C",
-        "Salt to taste",
-        "1 teaspoon of spice D"
-    ]
-    
-    instructions = [
-        "Mix all ingredients.",
-        "Cook on medium heat for 15 minutes.",
-        "Let it cool for 5 minutes.",
-        "Serve and enjoy!"
-    ]
-    
-    recipe = {
-        "id": str(uuid.uuid4()),
-        "name": name,
-        "ingredients": ", ".join(random.sample(ingredients, k=3)),
-        "cuisine_type": random.choice(cuisines),
-        "prep_time": random.randint(10, 60),
-        "instructions": instructions,
-        "tag": random.choice(tags),
-        "status": random.choice(statuses)
-    }
-    return recipe
+def call_openai_to_generate_recipe(recipe_name):
+    prompt = f"""
+    Generate a detailed recipe for "{recipe_name}". 
+    Include these fields in JSON format:
 
-# Helper: Display all recipes
+    {{
+        "name": "{recipe_name}",
+        "ingredients": ["list of ingredients"],
+        "cuisine_type": "cuisine type",
+        "prep_time": preparation time in minutes (integer),
+        "instructions": ["step by step instructions"],
+        "tag": "Vegetarian", "Non-Vegetarian", "Vegan" or "Other",
+        "status": "To Try", "Favorite" or "Made Before"
+    }}
+
+    Make sure JSON is valid.
+    """
+
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini",  # or "gpt-4", "gpt-3.5-turbo"
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7,
+        max_tokens=500,
+    )
+
+    text = response.choices[0].message.content.strip()
+    return text
+
+
+def parse_recipe_from_response(text):
+    import json
+    try:
+        # The model returns JSON — parse it
+        recipe_json = json.loads(text)
+        
+        # Some minor cleanups or fallback if keys missing
+        return {
+            "id": str(uuid.uuid4()),
+            "name": recipe_json.get("name", "Unnamed Recipe"),
+            "ingredients": ", ".join(recipe_json.get("ingredients", [])),
+            "cuisine_type": recipe_json.get("cuisine_type", "Other"),
+            "prep_time": int(recipe_json.get("prep_time", 30)),
+            "instructions": recipe_json.get("instructions", []),
+            "tag": recipe_json.get("tag", "Other"),
+            "status": recipe_json.get("status", "To Try")
+        }
+    except Exception as e:
+        st.error(f"Failed to parse AI response: {e}")
+        return None
+
+# Helper: Display all recipes (same as before, omitted here for brevity)
 def display_recipes(filtered):
     if not filtered:
         st.info("No recipes found.")
@@ -69,7 +87,6 @@ def display_recipes(filtered):
                     st.success("Recipe deleted.")
                     st.rerun()
 
-# Helper: Edit recipe
 def edit_recipe(recipe_id):
     recipe = next(r for r in st.session_state.recipes if r["id"] == recipe_id)
     st.session_state.editing = recipe_id
@@ -127,10 +144,13 @@ if st.button("Generate Recipe"):
     if not ai_recipe_name.strip():
         st.error("Please enter a recipe name.")
     else:
-        generated_recipe = ai_generate_recipe(ai_recipe_name.strip())
-        st.session_state.recipes.append(generated_recipe)
-        st.success(f"Recipe '{ai_recipe_name}' generated and added!")
-        st.rerun()
+        with st.spinner("Generating recipe with AI..."):
+            response_text = call_openai_to_generate_recipe(ai_recipe_name.strip())
+            recipe = parse_recipe_from_response(response_text)
+            if recipe:
+                st.session_state.recipes.append(recipe)
+                st.success(f"Recipe '{recipe['name']}' generated and added!")
+                st.rerun()
 
 st.divider()
 
