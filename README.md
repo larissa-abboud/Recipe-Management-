@@ -47,7 +47,7 @@ This is a Streamlit app to manage your recipes with features like adding, editin
 
    ```bash
    streamlit run app.py
-
+---
 ## or  
 
 python -m streamlit run recipe_managment.py
