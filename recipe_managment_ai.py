@@ -1,12 +1,47 @@
 import streamlit as st
 import pandas as pd
 import uuid
+import random
 
 # Initialize session state
 if "recipes" not in st.session_state:
     st.session_state.recipes = []
 if "instruction_steps" not in st.session_state:
     st.session_state.instruction_steps = [""]
+
+# Mock AI recipe generator function
+def ai_generate_recipe(name):
+    # Simple mock data for demo purposes
+    cuisines = ["Indian", "Italian", "Mexican", "Chinese", "Other"]
+    tags = ["Vegetarian", "Non-Vegetarian", "Vegan", "Other"]
+    statuses = ["To Try", "Favorite", "Made Before"]
+    
+    ingredients = [
+        "1 cup of ingredient A",
+        "2 tablespoons of ingredient B",
+        "3 slices of ingredient C",
+        "Salt to taste",
+        "1 teaspoon of spice D"
+    ]
+    
+    instructions = [
+        "Mix all ingredients.",
+        "Cook on medium heat for 15 minutes.",
+        "Let it cool for 5 minutes.",
+        "Serve and enjoy!"
+    ]
+    
+    recipe = {
+        "id": str(uuid.uuid4()),
+        "name": name,
+        "ingredients": ", ".join(random.sample(ingredients, k=3)),
+        "cuisine_type": random.choice(cuisines),
+        "prep_time": random.randint(10, 60),
+        "instructions": instructions,
+        "tag": random.choice(tags),
+        "status": random.choice(statuses)
+    }
+    return recipe
 
 # Helper: Display all recipes
 def display_recipes(filtered):
@@ -84,6 +119,20 @@ def edit_recipe(recipe_id):
             st.success("Recipe updated.")
             st.session_state.editing = None
             st.rerun()
+
+# === AI Recipe Generator Section ===
+st.title("🤖 AI Recipe Generator")
+ai_recipe_name = st.text_input("Enter recipe name to generate")
+if st.button("Generate Recipe"):
+    if not ai_recipe_name.strip():
+        st.error("Please enter a recipe name.")
+    else:
+        generated_recipe = ai_generate_recipe(ai_recipe_name.strip())
+        st.session_state.recipes.append(generated_recipe)
+        st.success(f"Recipe '{ai_recipe_name}' generated and added!")
+        st.rerun()
+
+st.divider()
 
 # App Title
 st.title("📖 Recipe Management System")
