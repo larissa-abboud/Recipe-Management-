@@ -125,16 +125,32 @@ with st.form("add_recipe"):
 
 st.divider()
 
-# Search
+# Search with filters
 st.subheader("🔍 Search Recipes")
-search_query = st.text_input("Search by name, cuisine, tag, or status")
-filtered_recipes = [
-    r for r in st.session_state.recipes
-    if search_query.lower() in r["name"].lower()
-    or search_query.lower() in r["cuisine_type"].lower()
-    or search_query.lower() in r["tag"].lower()
-    or search_query.lower() in r.get("status", "").lower()
-]
+
+# Dropdown filters
+cuisine_filter = st.selectbox("Filter by Cuisine", ["All", "Indian", "Italian", "Mexican", "Chinese", "Other"])
+tag_filter = st.selectbox("Filter by Tag", ["All", "Vegetarian", "Non-Vegetarian", "Vegan", "Other"])
+status_filter = st.selectbox("Filter by Status", ["All", "To Try", "Favorite", "Made Before"])
+search_query = st.text_input("Search by Recipe Name")
+
+# Apply filters
+filtered_recipes = st.session_state.recipes
+
+if cuisine_filter != "All":
+    filtered_recipes = [r for r in filtered_recipes if r["cuisine_type"] == cuisine_filter]
+
+if tag_filter != "All":
+    filtered_recipes = [r for r in filtered_recipes if r["tag"] == tag_filter]
+
+if status_filter != "All":
+    filtered_recipes = [r for r in filtered_recipes if r.get("status", "") == status_filter]
+
+if search_query.strip():
+    filtered_recipes = [
+        r for r in filtered_recipes
+        if search_query.lower() in r["name"].lower()
+    ]
 
 # Display recipes
 display_recipes(filtered_recipes)
